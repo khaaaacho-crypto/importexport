@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model SearchQuery {
+  id        String   @id @default(cuid())
+  query     String
+  status    String   @default("pending") // pending, processing, completed, failed
+  leads     Lead[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Lead {
+  id            String   @id @default(cuid())
+  name          String
+  location      String?
+  industry      String?
+  description   String?
+  website       String?
+  email         String?
+  phone         String?
+  annualValue   String?
+  leadScore     Int?
+  searchQueryId String
+  searchQuery   SearchQuery @relation(fields: [searchQueryId], references: [id])
+  insight       Insight?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Insight {
+  id                     String   @id @default(cuid())
+  leadId                 String   @unique
+  lead                   Lead     @relation(fields: [leadId], references: [id])
+  summary                String   @db.Text
+  industryClassification String
+  opportunityScore       Int
+  buyingIntentScore      Int
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
